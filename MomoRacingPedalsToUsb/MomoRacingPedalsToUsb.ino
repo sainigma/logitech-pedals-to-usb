@@ -15,10 +15,10 @@
 #define THROTTLEPIN A0
 #define BRAKEPIN A1
 #define INVERT_THROTTLE false
-#define INVERT_BRAKE false
+#define INVERT_BRAKE true
 #define JOYSTICK_LOWER_LIMIT 0
 #define JOYSTICK_UPPER_LIMIT 1023
-#define DELAY_BETWEEN_UPDATES 16
+#define DELAY_BETWEEN_UPDATES 5
 
 #include "src/Pedals/Pedals.h"
 #include <Joystick.h>
@@ -27,24 +27,43 @@ Joystick_ Joystick;
 
 bool reportCombined;
 Pedals pedals(THROTTLEPIN, BRAKEPIN, INVERT_THROTTLE, INVERT_BRAKE, JOYSTICK_LOWER_LIMIT, JOYSTICK_UPPER_LIMIT);
+int timer;
+int needsCalibration;
 
 void setup() {
-  reportCombined = false;
+  Serial.begin(9600);
+  reportCombined = true;
+  needsCalibration = true; 
   Joystick.begin();
 }
 
 void sendAxes(){
   if( reportCombined ){
-
+    Joystick.setRzAxis( pedals.getCombined() );
   }else{
-    Joystick.setAccelerator( pedals.getThrottle() );
-    Joystick.setBrake( pedals.getBrake() );
+    //Serial.print( pedals.getThrottle() );
+    //Serial.print( " " );
+    //Serial.println( pedals.getBrake() );
+    Joystick.setRxAxis( pedals.getThrottle() );
+    Joystick.setRyAxis( pedals.getBrake() );
+    //Joystick.setAccelerator( pedals.getThrottle() );
+    //Joystick.setBrake( pedals.getBrake() );
+    //Serial.print(analogRead(THROTTLEPIN));
+    //Serial.print(" ");
+    //Serial.println(analogRead(BRAKEPIN));
+    //Serial.println("%i %i", analogRead(THROTTLEPIN), analogRead(BRAKEPIN));
   }
 }
 
 void loop() {
+  timer = millis();
   pedals.update();
-  if( millis() - pedals.getLastUpdate() > DELAY_BETWEEN_UPDATES ){
+  if( timer - pedals.getLastUpdate() > DELAY_BETWEEN_UPDATES ){
     sendAxes();
+    /*
+    if( needsCalibration && timer > 500 ){
+      needsCalibration = false;
+      //modeChange()
+    }*/
   }
 }

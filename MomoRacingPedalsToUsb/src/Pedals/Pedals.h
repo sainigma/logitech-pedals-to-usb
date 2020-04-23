@@ -8,31 +8,21 @@
 #define Pedals_h
 
 #include "Arduino.h"
+#include "Axis.h"
 
 class Pedals{
   public:
     Pedals(int throttlePin, int brakePin, bool invertThrottle, bool invertBrake, int lowerLimit, int upperLimit);
     void update();
+    int getCombined();
     int getThrottle();
     int getBrake();
     unsigned long getLastUpdate();
   private:
-    int getPedal(bool pedalType);
-    void calibrate();
-    char _throttlePin;
-    int _throttle;
-    int _throttleMin;
-    int _throttleMax;
-    bool _throttleInvert;
-
-    char _brakePin;
-    int _brake;
-    int _brakeMin;
-    int _brakeMax;
-    bool _brakeInvert;
-
-    int _lowerLimit;
+    Axis *_throttle;
+    Axis *_brake;
     int _upperLimit;
+    int _lowerLimit;
     unsigned long _lastUpdate;
     char _weight;
 };
