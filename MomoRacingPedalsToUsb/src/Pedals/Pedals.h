@@ -17,6 +17,8 @@ class Pedals{
     int getCombined();
     int getThrottle();
     int getBrake();
+    int getThrottleDigital();
+    int getBrakeDigital();
     unsigned long getLastUpdate();
   private:
     Axis *_throttle;

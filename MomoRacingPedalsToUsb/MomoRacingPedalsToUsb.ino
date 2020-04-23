@@ -8,7 +8,7 @@
     -DB9 pin 6 to GND
 
   Created 22 Apr 2020
-  Modified 22 Apr 2020
+  Modified 23 Apr 2020
   by Kari Suominen
 */
 
@@ -20,38 +20,59 @@
 #define JOYSTICK_UPPER_LIMIT 1023
 #define DELAY_BETWEEN_UPDATES 5
 
+#define MODE_ANALOG_COMBINED_DIGITAL 0
+#define MODE_ANALOG_SEPARATE_DIGITAL 1
+#define MODE_DIGITAL 2
+
 #include "src/Pedals/Pedals.h"
 #include <Joystick.h>
 
 Joystick_ Joystick;
 
-bool reportCombined;
-Pedals pedals(THROTTLEPIN, BRAKEPIN, INVERT_THROTTLE, INVERT_BRAKE, JOYSTICK_LOWER_LIMIT, JOYSTICK_UPPER_LIMIT);
 int timer;
-int needsCalibration;
+char activeMode;
+bool reportCombined;
+bool modeInitialized;
+Pedals pedals(THROTTLEPIN, BRAKEPIN, INVERT_THROTTLE, INVERT_BRAKE, JOYSTICK_LOWER_LIMIT, JOYSTICK_UPPER_LIMIT);
+
 
 void setup() {
-  Serial.begin(9600);
   reportCombined = true;
-  needsCalibration = true; 
+  modeInitialized = false;
+  activeMode = -1;
   Joystick.begin();
 }
 
-void sendAxes(){
-  if( reportCombined ){
-    Joystick.setRzAxis( pedals.getCombined() );
+void initializeMode(){
+  bool throttleDown = pedals.getThrottleDigital() > 0;
+  bool brakeDown = pedals.getBrakeDigital() > 0;
+  if( throttleDown && brakeDown ){
+    activeMode = MODE_ANALOG_SEPARATE_DIGITAL;
+  }else if( throttleDown ){
+    activeMode = MODE_DIGITAL;
+  }else if( brakeDown ){
+    activeMode = MODE_DIGITAL;
   }else{
-    //Serial.print( pedals.getThrottle() );
-    //Serial.print( " " );
-    //Serial.println( pedals.getBrake() );
-    Joystick.setRxAxis( pedals.getThrottle() );
-    Joystick.setRyAxis( pedals.getBrake() );
-    //Joystick.setAccelerator( pedals.getThrottle() );
-    //Joystick.setBrake( pedals.getBrake() );
-    //Serial.print(analogRead(THROTTLEPIN));
-    //Serial.print(" ");
-    //Serial.println(analogRead(BRAKEPIN));
-    //Serial.println("%i %i", analogRead(THROTTLEPIN), analogRead(BRAKEPIN));
+    activeMode = MODE_ANALOG_COMBINED_DIGITAL;
+  }
+  modeInitialized = true;
+}
+
+void sendAxes(){
+  switch( activeMode ){
+    case MODE_ANALOG_COMBINED_DIGITAL:
+      Joystick.setRzAxis( pedals.getCombined() );
+      break;
+    case MODE_ANALOG_SEPARATE_DIGITAL:
+      Joystick.setRxAxis( pedals.getThrottle() );
+      Joystick.setRyAxis( pedals.getBrake() );
+      Joystick.setButton(0, pedals.getThrottleDigital());
+      Joystick.setButton(1, pedals.getBrakeDigital());
+      break;
+    case MODE_DIGITAL:
+      Joystick.setButton(0, pedals.getThrottleDigital());
+      Joystick.setButton(1, pedals.getBrakeDigital());
+      break;
   }
 }
 
@@ -59,11 +80,10 @@ void loop() {
   timer = millis();
   pedals.update();
   if( timer - pedals.getLastUpdate() > DELAY_BETWEEN_UPDATES ){
-    sendAxes();
-    /*
-    if( needsCalibration && timer > 500 ){
-      needsCalibration = false;
-      //modeChange()
-    }*/
+    if( !modeInitialized && time > 5000 ){
+      initializeMode();
+    }else{
+      sendAxes();
+    }
   }
 }

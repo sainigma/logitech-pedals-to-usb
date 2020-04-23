@@ -30,6 +30,14 @@ int Pedals::getBrake(){
   return _brake->get(_lowerLimit, _upperLimit);
 }
 
+int Pedals::getThrottleDigital(){
+  return _throttle->get(_lowerLimit, _upperLimit) > 1023 * 0.8 ? 1 : 0;
+}
+
+int Pedals::getBrakeDigital(){
+  return _brake->get(_lowerLimit, _upperLimit) > 1023 * 0.8 ? 1 : 0;
+}
+
 unsigned long Pedals::getLastUpdate(){
   return _lastUpdate;
 }
