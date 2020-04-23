@@ -1,8 +1,11 @@
 # Logitech Pedals To Usb
+
 ![](img/complete.jpg)
-Complete hardware project for using the Logitech pedals as an independent usb device
+
+Complete hardware project for using the Logitech pedals as an independent usb device e.g. as rudders, or as push-to-talk switches (works with Discord).
 
 ## Usage
+
   Connect the pedals to the device and plug it to usb. During startup keep the pedals first at rest and then press them down to change modes. The initialization phase ends after 5 seconds by default.
   
   Modes:
@@ -11,15 +14,19 @@ Complete hardware project for using the Logitech pedals as an independent usb de
   - Digital reporting only, keep both of the pedals pressed
 
 ## Requirements
+
   - Logitech racing wheel (Tested with Momo Racing Wheel, most likely works with other Logitech pedals as well)
   - Arduino with ATmega32u4 (Leonardo, Pro micro etc.)
   - [Arduino Joystick Library](https://github.com/MHeironimus/ArduinoJoystickLibrary)
 
 ## Case
-  The case is designed for Pro Micro and is toleranced for snap fit. The STL file contains the toleranced model, while the STEP file contains the model with exact dimensions.
+
+  The case is designed for Pro Micro and is toleranced for snap fit. The DB9 socket has to be glued to the wall of the lower case. [The STL files](models/stl/) contain toleranced models, while the [STEP files](models/step) contain models with exact dimensions.
 
 ## Wiring
+
 ![](img/wiring.jpg)
+
   Connect DB9 pin 9 to VCC and pin 6 to GND. For MOMO/DFP/DFGT pots are wired as pairs to 2&7 and 3&8. For G27 only pins 2, 3 and 4 are used for pots.
   
   If you plan to use this for only MOMO, solder pins 7 and 8 to analog inputs for simpler wiring. If you plan to use this with G27 or want a more universal adapter, solder pins 2, 3 and 4 to analog inputs.
@@ -27,6 +34,7 @@ Complete hardware project for using the Logitech pedals as an independent usb de
   Modify the configuration macros at project file to enable clutch and if axes are mapped wrong.
 
 ## Instructions
+
   1. Clone repo
   2. Install [Arduino Joystick Library](https://github.com/MHeironimus/ArduinoJoystickLibrary)
   3. Modify the configuration macros in LogitechPedalsToUsb.ino to
@@ -36,6 +44,6 @@ Complete hardware project for using the Logitech pedals as an independent usb de
       - Change initialization phase duration
   4. Compile LogitechPedalsToUsb.ino and upload
   5. 3d-print the case and solder the circuit
-  6. Glue DB9 socket to outer wall
+  6. Glue DB9 socket to the outer wall of the case
   7. Snap the case shut
   8. Enjoy
