@@ -12,13 +12,19 @@
   by Kari Suominen
 */
 
+/* Configuration */
 #define THROTTLEPIN A0
 #define BRAKEPIN A1
+#define CLUTCHPIN A2
+#define CLUTCH_ACTIVE false
 #define INVERT_THROTTLE false
 #define INVERT_BRAKE true
+#define INVERT_CLUTCH false
 #define JOYSTICK_LOWER_LIMIT 0
 #define JOYSTICK_UPPER_LIMIT 1023
 #define DELAY_BETWEEN_UPDATES 5
+#define INIT_PHASE_SECONDS 5
+/* Configuration end */
 
 #define MODE_ANALOG_COMBINED_DIGITAL 0
 #define MODE_ANALOG_SEPARATE_DIGITAL 1
@@ -33,7 +39,7 @@ int timer;
 char activeMode;
 bool reportCombined;
 bool modeInitialized;
-Pedals pedals(THROTTLEPIN, BRAKEPIN, INVERT_THROTTLE, INVERT_BRAKE, JOYSTICK_LOWER_LIMIT, JOYSTICK_UPPER_LIMIT);
+Pedals pedals(THROTTLEPIN, BRAKEPIN, CLUTCHPIN, INVERT_THROTTLE, INVERT_BRAKE, INVERT_CLUTCH, JOYSTICK_LOWER_LIMIT, JOYSTICK_UPPER_LIMIT);
 
 
 void setup() {
@@ -62,16 +68,22 @@ void sendAxes(){
   switch( activeMode ){
     case MODE_ANALOG_COMBINED_DIGITAL:
       Joystick.setRzAxis( pedals.getCombined() );
+      if( CLUTCH_ACTIVE ) Joystick.setZAxis( pedals.getClutch() );
       break;
     case MODE_ANALOG_SEPARATE_DIGITAL:
       Joystick.setRxAxis( pedals.getThrottle() );
       Joystick.setRyAxis( pedals.getBrake() );
       Joystick.setButton(0, pedals.getThrottleDigital());
       Joystick.setButton(1, pedals.getBrakeDigital());
+      if( CLUTCH_ACTIVE ){
+        Joystick.setButton(2, pedals.getClutchDigital());
+        Joystick.setZAxis( pedals.getClutch() );
+      }
       break;
     case MODE_DIGITAL:
       Joystick.setButton(0, pedals.getThrottleDigital());
       Joystick.setButton(1, pedals.getBrakeDigital());
+      if( CLUTCH_ACTIVE ) Joystick.setButton(2, pedals.getClutchDigital());
       break;
   }
 }
@@ -80,7 +92,7 @@ void loop() {
   timer = millis();
   pedals.update();
   if( timer - pedals.getLastUpdate() > DELAY_BETWEEN_UPDATES ){
-    if( !modeInitialized && time > 5000 ){
+    if( !modeInitialized && timer > (INIT_PHASE_SECONDS * 1000) ){
       initializeMode();
     }else{
       sendAxes();

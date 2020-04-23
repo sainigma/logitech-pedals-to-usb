@@ -12,17 +12,20 @@
 
 class Pedals{
   public:
-    Pedals(int throttlePin, int brakePin, bool invertThrottle, bool invertBrake, int lowerLimit, int upperLimit);
+    Pedals(int throttlePin, int brakePin, int clutchPin, bool invertThrottle, bool invertBrake, bool invertClutch, int lowerLimit, int upperLimit);
     void update();
     int getCombined();
     int getThrottle();
     int getBrake();
+    int getClutch();
     int getThrottleDigital();
     int getBrakeDigital();
+    int getClutchDigital();
     unsigned long getLastUpdate();
   private:
     Axis *_throttle;
     Axis *_brake;
+    Axis *_clutch;
     int _upperLimit;
     int _lowerLimit;
     unsigned long _lastUpdate;

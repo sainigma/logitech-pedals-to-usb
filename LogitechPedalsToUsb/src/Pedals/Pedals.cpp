@@ -1,9 +1,10 @@
 #include "Arduino.h"
 #include "Pedals.h"
 
-Pedals::Pedals(int throttlePin, int brakePin, bool invertThrottle, bool invertBrake, int lowerLimit, int upperLimit){
+Pedals::Pedals(int throttlePin, int brakePin, int clutchPin, bool invertThrottle, bool invertBrake, bool invertClutch, int lowerLimit, int upperLimit){
   _throttle = new Axis(throttlePin, invertThrottle);
   _brake = new Axis(brakePin, invertBrake);
+  _clutch = new Axis(clutchPin, invertClutch);
   _lowerLimit = lowerLimit;
   _upperLimit = upperLimit;
 }
@@ -30,12 +31,21 @@ int Pedals::getBrake(){
   return _brake->get(_lowerLimit, _upperLimit);
 }
 
+int Pedals::getClutch(){
+  _lastUpdate = millis();
+  return _clutch->get(_lowerLimit, _upperLimit);
+}
+
 int Pedals::getThrottleDigital(){
   return _throttle->get(_lowerLimit, _upperLimit) > 1023 * 0.8 ? 1 : 0;
 }
 
 int Pedals::getBrakeDigital(){
   return _brake->get(_lowerLimit, _upperLimit) > 1023 * 0.8 ? 1 : 0;
+}
+
+int Pedals::getClutchDigital(){
+  return _clutch->get(_lowerLimit, _upperLimit) > 1023 * 0.8 ? 1 : 0;
 }
 
 unsigned long Pedals::getLastUpdate(){
